@@ -35,6 +35,13 @@
   .wrap{max-width:480px;margin:0 auto;padding:36px 20px calc(60px + env(safe-area-inset-bottom));}
   .intro{font-size:15px;line-height:1.75;color:var(--ink-soft);text-align:center;margin:0 0 28px;}
 
+  .qr-card{position:relative;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:26px 24px;text-align:center;margin-bottom:20px;}
+  .qr-card::before,.qr-card::after{content:"";position:absolute;width:20px;height:20px;border-color:var(--gold);}
+  .qr-card::before{top:10px;left:10px;border-top:2px solid var(--gold);border-left:2px solid var(--gold);border-top-left-radius:6px;}
+  .qr-card::after{bottom:10px;right:10px;border-bottom:2px solid var(--gold);border-right:2px solid var(--gold);border-bottom-right-radius:6px;}
+  .qr-card img{width:190px;height:190px;border-radius:8px;background:#fff;padding:10px;border:1px solid var(--line);}
+  .qr-card p{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1.3px;margin:14px 0 0;}
+
   .open-btn{display:block;width:100%;background:var(--blue);color:#fff;border:none;padding:17px 22px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;text-align:center;text-decoration:none;margin-bottom:34px;box-shadow:0 6px 18px rgba(29,53,87,.22);}
 
   .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:34px;}
@@ -72,7 +79,12 @@
 </div>
 
 <div class="wrap">
-  <p class="intro">Toca el botón para abrir la app e instalarla en tu celular como cualquier otra aplicación.</p>
+  <p class="intro">Escaneá el código con la cámara del celular, o tocá el botón para abrir la app e instalarla.</p>
+
+  <div class="qr-card">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=380x380&data=https%3A%2F%2Fstefanomichelangeli2106-stack.github.io%2Fhabla-app%2F" alt="Código QR de la aplicación" width="190" height="190">
+    <p>Escaneá con la cámara del celular</p>
+  </div>
 
   <a class="open-btn" href="app.html">Abrir la aplicación →</a>
 
