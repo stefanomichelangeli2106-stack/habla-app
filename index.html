@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Habla — Aprende inglés</title>
+<meta name="theme-color" content="#2B4C7E">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: light;
+    --paper:#FBF7EF; --paper-2:#FFFFFF; --ink:#232323; --ink-soft:#6B6B63; --line:#E7E1D2;
+    --blue:#2B4C7E; --blue-deep:#1D3557; --blue-tint:#E7EEF8;
+    --coral:#E8734A; --coral-tint:#FBE4D9;
+    --gold:#D9A441; --gold-tint:#F6EAD2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+
+  .hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--blue-deep),var(--blue));padding:calc(48px + env(safe-area-inset-top)) 22px 56px;text-align:center;}
+  .blob{position:absolute;border-radius:50%;filter:blur(38px);opacity:.5;pointer-events:none;}
+  .blob1{width:200px;height:200px;background:var(--coral);top:-60px;left:-50px;animation:drift1 19s ease-in-out infinite alternate;}
+  .blob2{width:240px;height:240px;background:var(--gold);bottom:-80px;right:-60px;animation:drift2 23s ease-in-out infinite alternate;}
+  @keyframes drift1{from{transform:translate(0,0) scale(1);}to{transform:translate(24px,16px) scale(1.1);}}
+  @keyframes drift2{from{transform:translate(0,0) scale(1);}to{transform:translate(-20px,-22px) scale(1.06);}}
+
+  .hero-inner{position:relative;z-index:1;max-width:480px;margin:0 auto;}
+  .hero-mono{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#F1E9D8;opacity:.75;margin-bottom:14px;font-weight:600;}
+  .hero h1{font-family:'Poppins',sans-serif;font-weight:700;font-size:32px;color:#fff;margin:0 0 10px;}
+  .hero .sub{font-size:15px;line-height:1.65;color:#EAF0FA;opacity:.92;max-width:380px;margin:0 auto;}
+
+  .wrap{max-width:480px;margin:0 auto;padding:36px 20px calc(60px + env(safe-area-inset-bottom));}
+  .intro{font-size:15px;line-height:1.75;color:var(--ink-soft);text-align:center;margin:0 0 28px;}
+
+  .open-btn{display:block;width:100%;background:var(--blue);color:#fff;border:none;padding:17px 22px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;text-align:center;text-decoration:none;margin-bottom:34px;box-shadow:0 6px 18px rgba(29,53,87,.22);}
+
+  .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:34px;}
+  .feature{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;}
+  .feature .fe{font-size:24px;margin-bottom:6px;display:block;}
+  .feature span{font-size:12.5px;font-weight:600;color:var(--ink);}
+
+  .divider{display:flex;align-items:center;gap:12px;margin:0 0 22px;}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line);}
+  .divider span{font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;}
+
+  .platform{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:14px;}
+  .platform .tag{font-size:11px;text-transform:uppercase;letter-spacing:1.3px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-block;margin-bottom:12px;background:var(--blue-tint);color:var(--blue-deep);}
+  .platform.ios .tag{background:var(--gold-tint);color:#8a6d1f;}
+  .platform ol{margin:0;padding:0;list-style:none;counter-reset:step;}
+  .platform ol li{position:relative;padding-left:30px;font-size:14px;line-height:1.5;color:var(--ink);margin-bottom:11px;counter-increment:step;}
+  .platform ol li:last-child{margin-bottom:0;}
+  .platform ol li::before{content:counter(step);position:absolute;left:0;top:-1px;width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:600;}
+  .platform.ios ol li::before{background:var(--gold);}
+  .platform ol li b{color:var(--ink);}
+
+  .footnote{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:32px;line-height:1.7;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="hero-inner">
+    <div class="hero-mono">Aprende inglés a tu ritmo</div>
+    <h1>Habla</h1>
+    <p class="sub">Vocabulario, ejercicios y conversación práctica — todo en una app que llevas en tu bolsillo.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <p class="intro">Toca el botón para abrir la app e instalarla en tu celular como cualquier otra aplicación.</p>
+
+  <a class="open-btn" href="app.html">Abrir la aplicación →</a>
+
+  <div class="feature-grid">
+    <div class="feature"><span class="fe">📚</span><span>Vocabulario</span></div>
+    <div class="feature"><span class="fe">✏️</span><span>Ejercicios</span></div>
+    <div class="feature"><span class="fe">💬</span><span>Conversación</span></div>
+    <div class="feature"><span class="fe">📊</span><span>Progreso</span></div>
+  </div>
+
+  <div class="divider"><span>Cómo instalarla</span></div>
+
+  <div class="platform">
+    <span class="tag">Android · Chrome</span>
+    <ol>
+      <li>Tocá <b>"Abrir la aplicación"</b> de arriba</li>
+      <li>Tocá el menú <b>⋮</b> arriba a la derecha del navegador</li>
+      <li>Elegí <b>"Instalar app"</b> o <b>"Agregar a pantalla de inicio"</b></li>
+      <li>Confirmá — va a aparecer un ícono en tu pantalla de inicio</li>
+    </ol>
+  </div>
+
+  <div class="platform ios">
+    <span class="tag">iPhone · Safari</span>
+    <ol>
+      <li>Abrí el link con <b>Safari</b> (no funciona el atajo desde Chrome en iPhone)</li>
+      <li>Tocá el botón de compartir <b>□↑</b> abajo en el centro</li>
+      <li>Elegí <b>"Agregar a pantalla de inicio"</b></li>
+      <li>Confirmá — va a aparecer un ícono en tu pantalla de inicio</li>
+    </ol>
+  </div>
+
+  <p class="footnote">Una vez instalada, la app funciona sin conexión y guarda tu progreso en el celular.</p>
+</div>
+</body>
+</html>
