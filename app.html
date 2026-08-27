@@ -1333,7 +1333,22 @@ document.getElementById('resetBtn').addEventListener('click', () => {
    ========================================================= */
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(reg => {
+      reg.update().catch(()=>{});
+    }).catch(()=>{});
+
+    let refreshed = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(refreshed) return;
+      refreshed = true;
+      window.location.reload();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if(document.visibilityState === 'visible' && navigator.serviceWorker.controller){
+        navigator.serviceWorker.getRegistration().then(reg => reg && reg.update().catch(()=>{}));
+      }
+    });
   });
 }
 refreshTopBar();
