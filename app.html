@@ -351,6 +351,37 @@
     <div class="stat-grid" id="progressStats"></div>
     <p class="section-title">Dominio por categoría</p>
     <div id="masteryList"></div>
+
+    <p class="section-title">Sincronizar entre dispositivos</p>
+    <div class="reader-notice">Tus papers y glosario personal se guardan solo en este dispositivo. Usa esto para llevarlos a otro (por ejemplo, del celular a la compu, o al revés).</div>
+    <div class="cat-list">
+      <div class="cat-row" id="syncQrBtn">
+        <div class="cat-emoji">📱</div>
+        <div class="cat-info">
+          <div class="cat-name">Ver código QR</div>
+          <div class="cat-meta">Rápido, solo si tienes pocos datos</div>
+        </div>
+        <div class="cat-chev">›</div>
+      </div>
+      <div class="cat-row" id="syncExportBtn">
+        <div class="cat-emoji">📤</div>
+        <div class="cat-info">
+          <div class="cat-name">Exportar archivo</div>
+          <div class="cat-meta">Para cualquier cantidad de datos, incluidos papers largos</div>
+        </div>
+        <div class="cat-chev">›</div>
+      </div>
+      <div class="cat-row" id="syncImportBtn">
+        <div class="cat-emoji">📥</div>
+        <div class="cat-info">
+          <div class="cat-name">Importar en este dispositivo</div>
+          <div class="cat-meta">Desde un archivo que exportaste antes</div>
+        </div>
+        <div class="cat-chev">›</div>
+      </div>
+    </div>
+    <input type="file" id="importFileInput" accept="application/json" style="display:none">
+
     <p class="section-title">&nbsp;</p>
     <button class="btn btn-ghost" id="resetBtn">Reiniciar todo mi progreso</button>
   </div>
@@ -378,6 +409,16 @@
     <div class="sheet-actions">
       <button class="btn btn-secondary" id="sheetCloseBtn">Cerrar</button>
       <button class="btn btn-primary" id="sheetSaveBtn">Guardar en mi glosario</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="syncSheetOverlay">
+  <div class="word-sheet">
+    <div class="sheet-handle"></div>
+    <div id="syncSheetBody" style="text-align:center;"></div>
+    <div class="sheet-actions" style="margin-top:18px;">
+      <button class="btn btn-secondary" id="syncSheetCloseBtn" style="width:100%;">Cerrar</button>
     </div>
   </div>
 </div>
@@ -744,6 +785,7 @@ function goto(view){
     if(btn) btn.classList.add('active');
   }
   document.getElementById('wordSheetOverlay').classList.add('hidden');
+  document.getElementById('syncSheetOverlay').classList.add('hidden');
   window.scrollTo(0,0);
   if(view === 'home') renderHome();
   if(view === 'vocab') renderVocabList();
@@ -1327,6 +1369,120 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     goto('home');
   }
 });
+
+/* =========================================================
+   SYNC (export / import / QR)
+   ========================================================= */
+function syncPayload(){
+  return {v:1, customPapers: state.customPapers, customWords: state.customWords};
+}
+
+function openSyncSheet(html){
+  document.getElementById('syncSheetBody').innerHTML = html;
+  document.getElementById('syncSheetOverlay').classList.remove('hidden');
+}
+document.getElementById('syncSheetCloseBtn').addEventListener('click', () => {
+  document.getElementById('syncSheetOverlay').classList.add('hidden');
+});
+document.getElementById('syncSheetOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'syncSheetOverlay') document.getElementById('syncSheetOverlay').classList.add('hidden');
+});
+
+document.getElementById('syncQrBtn').addEventListener('click', () => {
+  const json = JSON.stringify(syncPayload());
+  const b64 = btoa(unescape(encodeURIComponent(json)));
+  if(b64.length > 1500){
+    openSyncSheet(
+      '<div style="font-size:40px;margin-bottom:10px;">📦</div>'+
+      '<p style="font-size:14.5px;line-height:1.6;">Tienes demasiados datos (papers largos) para un código QR ('+b64.length+' caracteres). Usa <b>"Exportar archivo"</b> en su lugar — funciona para cualquier cantidad.</p>'
+    );
+    return;
+  }
+  const url = location.origin + location.pathname + '#import=' + b64;
+  const qrImg = 'https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=' + encodeURIComponent(url);
+  openSyncSheet(
+    '<p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">Escanea con la cámara del otro dispositivo</p>'+
+    '<img src="'+qrImg+'" width="220" height="220" style="border-radius:10px;border:1px solid var(--line);">'
+  );
+});
+
+document.getElementById('syncExportBtn').addEventListener('click', () => {
+  const json = JSON.stringify(syncPayload(), null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const filename = 'habla-mis-datos-' + todayStr() + '.json';
+  const file = new File([blob], filename, {type:'application/json'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({files:[file], title:'Mis papers y glosario de Habla'}).catch(()=>{});
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  openSyncSheet(
+    '<div style="font-size:40px;margin-bottom:10px;">✅</div>'+
+    '<p style="font-size:14.5px;">Se descargó <b>'+filename+'</b>. Pásalo a tu otro dispositivo (email, WhatsApp, Drive) y ábrelo ahí con <b>"Importar en este dispositivo"</b>.</p>'
+  );
+});
+
+function mergeImportedData(data){
+  let addedPapers = 0, addedWords = 0;
+  (data.customPapers||[]).forEach(p => {
+    if(!state.customPapers.some(existing => existing.id === p.id)){
+      state.customPapers.push(p); addedPapers++;
+    }
+  });
+  (data.customWords||[]).forEach(w => {
+    if(!state.customWords.some(existing => existing.en.toLowerCase() === w.en.toLowerCase())){
+      state.customWords.push(w); addedWords++;
+    }
+  });
+  saveState();
+  return {addedPapers, addedWords};
+}
+
+document.getElementById('syncImportBtn').addEventListener('click', () => {
+  document.getElementById('importFileInput').click();
+});
+document.getElementById('importFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      const {addedPapers, addedWords} = mergeImportedData(data);
+      openSyncSheet(
+        '<div style="font-size:40px;margin-bottom:10px;">🎉</div>'+
+        '<p style="font-size:14.5px;">Importado: <b>'+addedPapers+'</b> paper(s) y <b>'+addedWords+'</b> palabra(s) nuevas.</p>'
+      );
+      renderProgress();
+    }catch(err){
+      openSyncSheet('<div style="font-size:40px;margin-bottom:10px;">⚠️</div><p style="font-size:14.5px;">No se pudo leer el archivo. Asegúrate de exportarlo desde Habla.</p>');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+function handleHashImport(){
+  if(!location.hash.startsWith('#import=')) return;
+  try{
+    const b64 = location.hash.slice(8);
+    const json = decodeURIComponent(escape(atob(b64)));
+    const data = JSON.parse(json);
+    const {addedPapers, addedWords} = mergeImportedData(data);
+    window.addEventListener('load', () => {
+      openSyncSheet(
+        '<div style="font-size:40px;margin-bottom:10px;">🎉</div>'+
+        '<p style="font-size:14.5px;">Importado desde el código QR: <b>'+addedPapers+'</b> paper(s) y <b>'+addedWords+'</b> palabra(s) nuevas.</p>'
+      );
+    });
+  }catch(e){ /* ignore malformed hash */ }
+  history.replaceState(null, '', location.pathname);
+}
+handleHashImport();
 
 /* =========================================================
    INIT
