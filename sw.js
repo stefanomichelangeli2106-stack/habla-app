@@ -1,4 +1,4 @@
-const CACHE_NAME = "habla-app-v4";
+const CACHE_NAME = "habla-app-v5";
 const APP_SHELL = [
   "./",
   "./index.html",

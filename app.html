@@ -159,13 +159,11 @@
   .btn-ghost{background:transparent;color:var(--red);}
   .btn[disabled]{opacity:.45;pointer-events:none;}
 
-  /* ---------- PAPERS ---------- */
+  /* ---------- READING ---------- */
   .paper-row{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;}
   .paper-emoji{font-size:22px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--green-tint);border-radius:12px;flex-shrink:0;}
   .paper-title{font-weight:600;font-size:14.5px;}
   .paper-meta{font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
-  .paper-tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
-  .paper-tag{font-size:10.5px;background:var(--blue-tint);color:var(--blue-deep);padding:2px 8px;border-radius:10px;font-weight:600;}
   .paper-check{margin-left:auto;font-size:17px;flex-shrink:0;}
 
   .reader-notice{background:var(--gold-tint);border:1px solid #ECD9AE;border-radius:12px;padding:12px 14px;font-size:12.5px;color:#5c4a1f;line-height:1.5;margin-bottom:18px;}
@@ -173,12 +171,14 @@
   .reader-text .word{cursor:pointer;border-radius:4px;padding:0 1px;transition:background .1s;}
   .reader-text .word:active{background:var(--gold-tint);}
   .reader-text .word.saved{background:var(--green-tint);}
+  .reader-text .word.phrase{border-bottom:2px dotted var(--coral);}
   .reader-actions{margin-top:20px;}
 
-  .add-paper-form{display:flex;flex-direction:column;gap:12px;}
-  .add-paper-form input, .add-paper-form textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-size:14px;font-family:'Inter',sans-serif;background:var(--card);color:var(--ink);}
-  .add-paper-form textarea{min-height:220px;resize:vertical;line-height:1.6;}
-  .add-paper-form label{font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:-6px;}
+  /* ---------- LISTENING ---------- */
+  .listen-box{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:22px;padding:24px;background:var(--blue-tint);border-radius:16px;}
+  .listen-play{background:var(--blue);color:#fff;border:none;width:64px;height:64px;border-radius:50%;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .listen-hint{font-size:12.5px;color:var(--blue-deep);font-weight:600;margin:0;}
+  .listen-transcript{margin-top:14px;font-size:13px;color:var(--ink-soft);font-style:italic;line-height:1.5;}
 
   .sheet-overlay{position:fixed;inset:0;background:rgba(20,18,10,.35);z-index:50;display:flex;align-items:flex-end;}
   .sheet-overlay.hidden{display:none;}
@@ -249,11 +249,11 @@
     </div>
 
     <p class="section-title">Nuevo</p>
-    <button class="quick-card" data-goto="papers" style="width:100%;text-align:left;display:flex;align-items:center;gap:14px;">
-      <span class="qc-icon" style="margin:0;">📄</span>
+    <button class="quick-card" data-goto="reading" style="width:100%;text-align:left;display:flex;align-items:center;gap:14px;">
+      <span class="qc-icon" style="margin:0;">📖</span>
       <div>
-        <div class="qc-title">Papers de oncología</div>
-        <div class="qc-sub">Toca cualquier palabra para traducirla y escucharla</div>
+        <div class="qc-title">Comprensión de lectura</div>
+        <div class="qc-sub">Textos de nivel intermedio, con preguntas al final</div>
       </div>
     </button>
 
@@ -312,38 +312,34 @@
     <div id="talkPlayArea"></div>
   </div>
 
-  <div class="view hidden" id="view-papers">
-    <p class="section-title">Papers de oncología</p>
-    <div class="reader-notice">Los textos de ejemplo son resúmenes originales de práctica sobre cáncer de mama (no son artículos publicados). Toca cualquier palabra para traducirla y escucharla. También puedes pegar tus propios papers reales.</div>
-    <div class="cat-list" id="papersList"></div>
-    <div style="margin-top:16px;">
-      <button class="btn btn-secondary" data-goto="paper-add">+ Agregar mi propio paper</button>
-    </div>
+  <div class="view hidden" id="view-reading">
+    <p class="section-title">Comprensión de lectura</p>
+    <div class="reader-notice">Toca cualquier palabra o frase subrayada para traducirla y escucharla. Al terminar de leer, responde las preguntas de comprensión.</div>
+    <div class="cat-list" id="readingList"></div>
   </div>
 
-  <div class="view hidden" id="view-paper-add">
+  <div class="view hidden" id="view-reading-read">
     <div class="dlg-header">
-      <button class="back-btn" data-goto="papers">←</button>
-      <h2 style="margin:0;font-size:17px;">Agregar paper</h2>
+      <button class="back-btn" data-goto="reading">←</button>
+      <h2 id="readingReadTitle" style="margin:0;font-size:16px;"></h2>
     </div>
-    <div class="add-paper-form">
-      <label>Título</label>
-      <input type="text" id="paperTitleInput" placeholder="Ej: Neoadjuvant therapy in HER2+ breast cancer">
-      <label>Texto (en inglés)</label>
-      <textarea id="paperBodyInput" placeholder="Pega aquí el texto en inglés..."></textarea>
-      <button class="btn btn-primary" id="savePaperBtn">Guardar y leer</button>
-    </div>
-  </div>
-
-  <div class="view hidden" id="view-paper-read">
-    <div class="dlg-header">
-      <button class="back-btn" data-goto="papers">←</button>
-      <h2 id="paperReadTitle" style="margin:0;font-size:16px;"></h2>
-    </div>
-    <div class="reader-text" id="paperReadBody"></div>
+    <div class="reader-text" id="readingReadBody"></div>
     <div class="reader-actions">
-      <button class="btn btn-primary" id="markReadBtn">Marcar como leído ✓</button>
+      <button class="btn btn-primary" id="readingContinueBtn">Continuar a las preguntas →</button>
     </div>
+  </div>
+
+  <div class="view hidden" id="view-reading-quiz">
+    <div class="dlg-header">
+      <button class="back-btn" data-goto="reading">←</button>
+      <h2 style="margin:0;font-size:17px;">Preguntas de comprensión</h2>
+    </div>
+    <div class="quiz-progress-track"><div class="quiz-progress-fill" id="readingQuizProgressFill" style="width:0%"></div></div>
+    <div id="readingQuizArea"></div>
+  </div>
+
+  <div class="view hidden" id="view-reading-result">
+    <div class="result-wrap" id="readingResultArea"></div>
   </div>
 
   <div class="view hidden" id="view-progress">
@@ -353,7 +349,7 @@
     <div id="masteryList"></div>
 
     <p class="section-title">Sincronizar entre dispositivos</p>
-    <div class="reader-notice">Tus papers y glosario personal se guardan solo en este dispositivo. Usa esto para llevarlos a otro (por ejemplo, del celular a la compu, o al revés).</div>
+    <div class="reader-notice">Tu glosario personal se guarda solo en este dispositivo. Usa esto para llevarlo a otro (por ejemplo, del celular a la compu, o al revés).</div>
     <div class="cat-list">
       <div class="cat-row" id="syncQrBtn">
         <div class="cat-emoji">📱</div>
@@ -367,7 +363,7 @@
         <div class="cat-emoji">📤</div>
         <div class="cat-info">
           <div class="cat-name">Exportar archivo</div>
-          <div class="cat-meta">Para cualquier cantidad de datos, incluidos papers largos</div>
+          <div class="cat-meta">Para cualquier cantidad de datos</div>
         </div>
         <div class="cat-chev">›</div>
       </div>
@@ -392,7 +388,7 @@
       <button class="nav-btn" data-goto="vocab"><span class="nav-icon">📚</span><span class="nav-label">Vocab.</span></button>
       <button class="nav-btn" data-goto="quiz"><span class="nav-icon">✏️</span><span class="nav-label">Ejerc.</span></button>
       <button class="nav-btn" data-goto="talk"><span class="nav-icon">💬</span><span class="nav-label">Hablar</span></button>
-      <button class="nav-btn" data-goto="papers"><span class="nav-icon">📄</span><span class="nav-label">Papers</span></button>
+      <button class="nav-btn" data-goto="reading"><span class="nav-icon">📖</span><span class="nav-label">Lectura</span></button>
       <button class="nav-btn" data-goto="progress"><span class="nav-icon">📊</span><span class="nav-label">Progreso</span></button>
     </div>
   </div>
@@ -563,35 +559,106 @@ const VOCAB = [
     ['Beautiful','Hermoso / Bonito','What a beautiful sunset!','¡Qué atardecer tan hermoso!'],
     ['Expensive','Caro','This restaurant is expensive.','Este restaurante es caro.'],
     ['Cheap','Barato','I found a cheap flight.','Encontré un vuelo barato.']
+  ]},
+  {id:'phrasal', name:'Phrasal Verbs', emoji:'🧩', level:'Intermedio', words:[
+    ['Give up','Rendirse / Dejar de hacer algo','Don\'t give up on your dreams.','No te rindas con tus sueños.'],
+    ['Look forward to','Esperar con ganas','I\'m looking forward to the weekend.','Espero con ganas el fin de semana.'],
+    ['Get along with','Llevarse bien con','I get along with my coworkers.','Me llevo bien con mis compañeros de trabajo.'],
+    ['Run into','Encontrarse con alguien por casualidad','I ran into an old friend yesterday.','Me encontré con un viejo amigo ayer.'],
+    ['Put off','Posponer','We had to put off the meeting.','Tuvimos que posponer la reunión.'],
+    ['Figure out','Descifrar / Entender','I can\'t figure out this problem.','No puedo descifrar este problema.'],
+    ['Come up with','Idear / Proponer','She came up with a great idea.','Ella ideó una gran idea.'],
+    ['Break down','Descomponerse / Analizar en partes','My car broke down on the highway.','Mi auto se descompuso en la autopista.'],
+    ['Take after','Parecerse a (familia)','She takes after her mother.','Ella se parece a su madre.'],
+    ['Get over','Superar','It took him months to get over the breakup.','Le tomó meses superar la ruptura.'],
+    ['Bring up','Mencionar / Criar','Why did you bring up that topic?','¿Por qué mencionaste ese tema?'],
+    ['Turn down','Rechazar','She turned down the job offer.','Ella rechazó la oferta de trabajo.'],
+    ['Carry out','Llevar a cabo','They carried out the plan successfully.','Llevaron a cabo el plan con éxito.'],
+    ['Set up','Establecer / Configurar','We need to set up the new office.','Necesitamos establecer la nueva oficina.'],
+    ['Deal with','Lidiar con','I don\'t know how to deal with stress.','No sé cómo lidiar con el estrés.']
+  ]},
+  {id:'idioms', name:'Modismos y expresiones', emoji:'💭', level:'Intermedio', words:[
+    ['Piece of cake','Pan comido (muy fácil)','The exam was a piece of cake.','El examen fue pan comido.'],
+    ['Under the weather','Sentirse mal / enfermo','I\'m feeling a bit under the weather today.','Hoy me siento un poco mal.'],
+    ['Hit the books','Ponerse a estudiar','I need to hit the books before the test.','Necesito ponerme a estudiar antes del examen.'],
+    ['Break the ice','Romper el hielo','He told a joke to break the ice.','Contó un chiste para romper el hielo.'],
+    ['Cost an arm and a leg','Costar un ojo de la cara','That car costs an arm and a leg.','Ese auto cuesta un ojo de la cara.'],
+    ['Once in a blue moon','Muy de vez en cuando','We only meet once in a blue moon.','Solo nos vemos muy de vez en cuando.'],
+    ['On the same page','Estar de acuerdo / En sintonía','Let\'s make sure we\'re on the same page.','Asegurémonos de estar en sintonía.'],
+    ['Bite the bullet','Aguantar / Afrontar algo difícil','I decided to bite the bullet and quit smoking.','Decidí aguantar y dejar de fumar.'],
+    ['Call it a day','Terminar por hoy','Let\'s call it a day and go home.','Terminemos por hoy y vayamos a casa.'],
+    ['Cut corners','Hacer las cosas mal por ahorrar','Don\'t cut corners on safety.','No hagas las cosas mal por ahorrar en seguridad.'],
+    ['Get the ball rolling','Poner algo en marcha','Let\'s get the ball rolling on this project.','Pongamos en marcha este proyecto.'],
+    ['In the long run','A largo plazo','It will save money in the long run.','Ahorrará dinero a largo plazo.'],
+    ['Speak of the devil','Hablando del rey de Roma','Speak of the devil, here she comes.','Hablando del rey de Roma, ahí viene.'],
+    ['Miss the boat','Perder la oportunidad','If you don\'t apply now, you\'ll miss the boat.','Si no aplicas ahora, perderás la oportunidad.'],
+    ['Get cold feet','Acobardarse en el último momento','He got cold feet before the wedding.','Se acobardó justo antes de la boda.']
+  ]},
+  {id:'advanced', name:'Vocabulario avanzado', emoji:'🎓', level:'Intermedio', words:[
+    ['Reluctant','Reacio / Reticente','She was reluctant to accept the offer.','Ella se mostró reacia a aceptar la oferta.'],
+    ['Overwhelmed','Abrumado','I feel overwhelmed with so much work.','Me siento abrumado con tanto trabajo.'],
+    ['Meticulous','Meticuloso','He is meticulous about details.','Él es meticuloso con los detalles.'],
+    ['Ambiguous','Ambiguo','The instructions were ambiguous.','Las instrucciones eran ambiguas.'],
+    ['Persistent','Persistente','She was persistent until she got the answer.','Ella fue persistente hasta obtener la respuesta.'],
+    ['Inevitable','Inevitable','Change is inevitable.','El cambio es inevitable.'],
+    ['Versatile','Versátil','He\'s a versatile musician.','Es un músico versátil.'],
+    ['Plausible','Verosímil / Creíble','That\'s a plausible explanation.','Esa es una explicación creíble.'],
+    ['Skeptical','Escéptico','I\'m skeptical about that theory.','Soy escéptico respecto a esa teoría.'],
+    ['Thorough','Minucioso / Exhaustivo','She did a thorough investigation.','Ella hizo una investigación exhaustiva.'],
+    ['Substantial','Sustancial / Considerable','There was a substantial increase in sales.','Hubo un aumento considerable en las ventas.'],
+    ['Ambitious','Ambicioso','He has ambitious goals for the company.','Él tiene metas ambiciosas para la empresa.'],
+    ['Insightful','Perspicaz / Revelador','That was an insightful comment.','Ese fue un comentario perspicaz.'],
+    ['Redundant','Redundante / Innecesario','That sentence is redundant.','Esa oración es redundante.'],
+    ['Feasible','Factible / Viable','Is this plan feasible?','¿Es este plan factible?']
+  ]},
+  {id:'connectors', name:'Conectores y lenguaje formal', emoji:'🔗', level:'Intermedio', words:[
+    ['However','Sin embargo','The plan was good; however, it was too expensive.','El plan era bueno; sin embargo, era muy caro.'],
+    ['Moreover','Además / Es más','The hotel is cheap. Moreover, it\'s close to the beach.','El hotel es barato. Además, está cerca de la playa.'],
+    ['Nevertheless','No obstante / Aun así','It was raining; nevertheless, we went out.','Estaba lloviendo; aun así, salimos.'],
+    ['Although','Aunque','Although it was late, we kept working.','Aunque era tarde, seguimos trabajando.'],
+    ['Despite','A pesar de','Despite the rain, the event continued.','A pesar de la lluvia, el evento continuó.'],
+    ['As long as','Siempre que / Mientras','You can stay as long as you like.','Puedes quedarte el tiempo que quieras.'],
+    ['As a result','Como resultado','He studied hard; as a result, he passed.','Estudió mucho; como resultado, aprobó.'],
+    ['On the other hand','Por otro lado','I like the city; on the other hand, it\'s noisy.','Me gusta la ciudad; por otro lado, es ruidosa.'],
+    ['In spite of','A pesar de','In spite of the difficulties, they succeeded.','A pesar de las dificultades, tuvieron éxito.'],
+    ['Therefore','Por lo tanto','The store was closed; therefore, we went home.','La tienda estaba cerrada; por lo tanto, nos fuimos a casa.'],
+    ['Furthermore','Además / Asimismo','The report is late. Furthermore, it has many errors.','El informe está atrasado. Además, tiene muchos errores.'],
+    ['Unless','A menos que','We won\'t go unless it stops raining.','No iremos a menos que deje de llover.'],
+    ['Provided that','Siempre y cuando','You can borrow it, provided that you return it.','Puedes tomarlo prestado, siempre y cuando lo devuelvas.'],
+    ['Whereas','Mientras que','She likes tea, whereas he prefers coffee.','A ella le gusta el té, mientras que él prefiere el café.'],
+    ['Given that','Dado que','Given that it\'s late, let\'s finish tomorrow.','Dado que es tarde, terminemos mañana.']
   ]}
 ];
 
 const GRAMMAR_QUESTIONS = [
-  ['I ___ a student.',['am','is','are','be'],'am'],
-  ['She ___ from Colombia.',['am','is','are','be'],'is'],
-  ['They ___ my friends.',['am','is','are','be'],'are'],
-  ['He ___ two brothers.',['have','has','having','had'],'has'],
-  ['I ___ coffee every morning.',['drink','drinks','drank','drinking'],'drink'],
-  ['There ___ a book on the table.',['is','are','am','be'],'is'],
-  ['There ___ three books on the table.',['is','are','am','be'],'are'],
-  ['Yesterday, I ___ to the store.',['go','went','goes','going'],'went'],
-  ['Last night, she ___ dinner.',['cook','cooked','cooks','cooking'],'cooked'],
-  ['I ___ watching TV right now.',['am','is','are','be'],'am'],
-  ['We ___ working on a project.',['am','is','are','be'],'are'],
-  ['This is ___ apple.',['a','an','the','—'],'an'],
-  ['This is ___ car.',['a','an','the','—'],'a'],
-  ['The cat is ___ the table.',['in','on','at','to'],'on'],
-  ['I live ___ Madrid.',['in','on','at','to'],'in'],
-  ['The meeting is ___ 3 pm.',['in','on','at','to'],'at'],
-  ['My house is bigger than ___.',['hers','her','she','herself'],'hers'],
-  ['This is the ___ book I\'ve ever read.',['good','better','best','goodest'],'best'],
-  ['She is ___ than her brother.',['tall','taller','tallest','more tall'],'taller'],
-  ['How ___ apples do you want?',['much','many','a lot','few'],'many'],
-  ['How ___ water do you need?',['much','many','a lot','few'],'much'],
-  ['I don\'t have ___ money.',['some','any','a','the'],'any'],
-  ['There is ___ milk in the fridge.',['some','any','a','the'],'some'],
-  ['Can you ___ me a favor?',['do','make','doing','making'],'do'],
-  ['Let\'s ___ a decision.',['do','make','doing','making'],'make']
+  ['If it rains tomorrow, we ___ the picnic.',['will cancel','cancel','would cancel','canceled'],'will cancel'],
+  ['If I were you, I ___ that job offer.',['would accept','accept','will accept','accepted'],'would accept'],
+  ['If she had studied harder, she ___ the exam.',['would have passed','would pass','passed','will pass'],'would have passed'],
+  ['If you heat water to 100°C, it ___.',['boils','boiled','will boil','is boiling'],'boils'],
+  ['The report ___ by the manager yesterday.',['was written','wrote','has written','writes'],'was written'],
+  ['This building ___ in 1990.',['was built','built','has built','builds'],'was built'],
+  ['English ___ all over the world.',['is spoken','speaks','spoke','has spoken'],'is spoken'],
+  ['She said that she ___ tired.',['was','is','were','has been'],'was'],
+  ['He told me that he ___ the report the next day.',['would finish','will finish','finishes','finished'],'would finish'],
+  ['She asked me where I ___.',['lived','live','living','had live'],'lived'],
+  ['He must ___ very tired after the trip.',['have been','be','has been','being'],'have been'],
+  ['She might ___ the email already.',['have sent','send','sent','sends'],'have sent'],
+  ['That can\'t ___ true.',['be','been','being','is'],'be'],
+  ['The man ___ is sitting there is my uncle.',['who','which','whom','whose'],'who'],
+  ['The book ___ I borrowed was excellent.',['that','who','whom','whose'],'that'],
+  ['This is the house ___ I grew up.',['where','which','who','when'],'where'],
+  ['I enjoy ___ new languages.',['learning','to learn','learn','learned'],'learning'],
+  ['She decided ___ the job.',['to accept','accepting','accept','accepted'],'to accept'],
+  ['I\'m looking forward to ___ you again.',['seeing','see','saw','seen'],'seeing'],
+  ['This is by far the ___ movie I\'ve ever seen.',['best','better','goodest','more good'],'best'],
+  ['The more you practice, the ___ you get.',['better','best','gooder','more better'],'better'],
+  ['He gave up smoking last year, ___?',['didn\'t he','did he','doesn\'t he','isn\'t he'],'didn\'t he'],
+  ['You\'ve finished the project, ___?',['haven\'t you','hasn\'t you','don\'t you','didn\'t you'],'haven\'t you'],
+  ['When I was a child, I ___ to the park every Sunday.',['used to go','use to go','would used to go','was going'],'used to go'],
+  ['I can\'t help ___ about the exam.',['worrying','to worry','worry','worried'],'worrying'],
+  ['By the time we arrived, the movie ___ already.',['had started','started','has started','starts'],'had started'],
+  ['She\'s been working here ___ five years.',['for','since','during','in'],'for'],
+  ['I\'ve lived in this city ___ 2015.',['since','for','from','during'],'since']
 ];
 
 const DIALOGUES = [
@@ -668,44 +735,105 @@ const TIPS = [
   'Revisa tus palabras difíciles seguido: la repetición espaciada es clave para no olvidarlas.'
 ];
 
-const PAPERS = [
-  {id:'subtypes', title:'Breast Cancer Subtypes: An Overview', level:'Intermedio', tags:['Oncología','Básico'], body:
-`Breast cancer is not a single disease. Pathologists classify it into different molecular subtypes based on the presence of specific receptors on the surface of tumor cells. The three receptors doctors test for are the estrogen receptor (ER), the progesterone receptor (PR), and the human epidermal growth factor receptor 2 (HER2).
+const READING = [
+  {id:'remote-work', title:'Remote Work: The New Normal', level:'Intermedio', topic:'Trabajo',
+    phrases:['figure out','deal with','come up with','get along with','on the same page','given up','here to stay'],
+    body:
+`When the pandemic forced offices to close, many companies had to figure out how to keep their business running from employees' homes. At first, it seemed like a temporary fix, but five years later, remote work has become the new normal for millions of people.
 
-Tumors that express ER or PR are called hormone receptor-positive. These tumors often grow in response to estrogen, so they usually respond well to hormone therapy, such as tamoxifen or aromatase inhibitors. Hormone receptor-positive tumors are the most common subtype and tend to grow more slowly than other types.
+Some employees love it. They no longer have to commute for hours, and they can spend more time with their families. Others find it harder to deal with. Without the structure of an office, some people struggle to stay focused, and they end up working longer hours than before.
 
-Tumors that overexpress the HER2 protein are called HER2-positive. Although HER2-positive tumors can grow quickly, targeted drugs like trastuzumab have dramatically improved outcomes for these patients over the past two decades.
+Managers had to come up with new ways to keep teams connected. Weekly video calls, online chat channels, and virtual coffee breaks became common tools to help colleagues get along with each other despite the distance.
 
-Tumors that lack all three receptors are called triple-negative breast cancer (TNBC). This subtype does not respond to hormone therapy or HER2-targeted drugs, so chemotherapy remains the main treatment option, although immunotherapy is now changing that picture.
+Not every company is on the same page about the future. Some are asking employees to return to the office at least a few days a week, while others have given up on offices altogether. Whether remote work is here to stay or just a passing trend, one thing is clear: the way we think about work has changed for good.`,
+    questions:[
+      {q:'According to the text, why did companies start remote work?', options:['Because employees asked for it','Because the pandemic forced offices to close','Because it was cheaper','Because of new technology'], answer:'Because the pandemic forced offices to close'},
+      {q:'What is one disadvantage of remote work mentioned in the text?', options:['Employees spend less time with family','Some people struggle to stay focused','It costs more money','There are no video calls'], answer:'Some people struggle to stay focused'},
+      {q:'What does "on the same page" mean in this context?', options:['In agreement','Reading the same book','In the same building','Working the same hours'], answer:'In agreement'},
+      {q:'What is the author\'s overall conclusion about remote work?', options:['It will disappear soon','It has changed how we think about work permanently','It only works for managers','It is worse than office work'], answer:'It has changed how we think about work permanently'}
+    ]},
+  {id:'streaming', title:'The Rise of Streaming Services', level:'Intermedio', topic:'Tecnología',
+    phrases:['deal with','give up','come up with','here to stay'],
+    body:
+`Twenty years ago, if you wanted to watch a movie, you had to go to a video store or wait for it to air on television. Today, thousands of movies and shows are available at the touch of a button. Streaming services have completely transformed the entertainment industry.
 
-Understanding the subtype of a tumor helps oncologists choose the most effective treatment plan for each patient. This is a clear example of precision medicine in modern oncology.`},
+This shift didn't happen overnight. Early platforms had to deal with slow internet connections and skeptical audiences who were used to owning physical copies of their favorite films. Over time, as internet speeds improved, more and more people decided to give up their DVD collections and switch to streaming.
 
-  {id:'her2', title:'HER2-Positive Breast Cancer and Targeted Therapy', level:'Avanzado', tags:['Oncología','HER2'], body:
-`Approximately fifteen to twenty percent of breast cancers are HER2-positive, meaning the tumor cells produce too much of the HER2 protein. This protein sits on the surface of the cell and sends signals that tell the cell to grow and divide. When there is too much HER2, cells can grow uncontrollably.
+The competition between platforms has become fierce. Each company tries to come up with original content that will make it stand out from the rest. Some viewers say this is a golden age of television, with more high-quality shows than ever before. Others feel overwhelmed by having too many options and too many different subscriptions to keep track of.
 
-Before targeted therapy existed, HER2-positive breast cancer was considered one of the most aggressive subtypes, with a higher risk of recurrence. Everything changed with the development of trastuzumab, a monoclonal antibody that binds to the HER2 protein and blocks its growth signal.
+Despite the challenges, it seems streaming is here to stay. The way people consume entertainment has changed forever, and traditional television networks have had to adapt or risk becoming a thing of the past.`,
+    questions:[
+      {q:'What did people have to do before streaming existed to watch a movie?', options:['Go to a video store or wait for a TV broadcast','Download it from the internet','Ask a friend','Buy a subscription'], answer:'Go to a video store or wait for a TV broadcast'},
+      {q:'What challenge did early streaming platforms face?', options:['Too much content','Slow internet and skeptical audiences','Too few actors','Government regulations'], answer:'Slow internet and skeptical audiences'},
+      {q:'According to the text, why do some viewers feel overwhelmed?', options:['Because shows are too long','Because there are too many options and subscriptions','Because the internet is too slow','Because they miss physical DVDs'], answer:'Because there are too many options and subscriptions'},
+      {q:'What does the text suggest about traditional TV networks?', options:['They have disappeared completely','They must adapt or become outdated','They are more popular than ever','They don\'t compete with streaming'], answer:'They must adapt or become outdated'}
+    ]},
+  {id:'procrastination', title:'Why We Procrastinate', level:'Intermedio', topic:'Psicología',
+    phrases:['puts off','hitting the books','deal with','get the ball rolling','figure out','in the long run'],
+    body:
+`Almost everyone puts off tasks from time to time, but for some people, procrastination becomes a serious problem. Instead of hitting the books before an exam or finishing an important project, they find themselves scrolling through their phones or cleaning their kitchen for the third time that week.
 
-Since then, several other HER2-targeted drugs have been developed, including pertuzumab, which is often combined with trastuzumab, and newer antibody-drug conjugates such as trastuzumab deruxtecan. These conjugates work like a guided missile: the antibody finds the HER2-positive cell, and the attached chemotherapy drug destroys it directly, reducing damage to healthy tissue.
+Psychologists say procrastination isn't really about laziness. It's often related to fear: fear of failure, fear of doing something imperfectly, or simply feeling overwhelmed by a task that seems too big to handle. When a project feels impossible, the brain looks for an escape, and checking social media feels a lot easier than facing a difficult challenge.
 
-Today, patients with HER2-positive breast cancer who receive targeted therapy have outcomes that are similar to, or in some cases better than, patients with hormone receptor-positive disease. This transformation is considered one of the great success stories in modern oncology.`},
+The good news is that there are ways to deal with this habit. Breaking a large task into smaller, more manageable steps can make it feel less intimidating. Setting a timer for just ten minutes of work, rather than promising to finish the whole project, can also help someone get the ball rolling.
 
-  {id:'tnbc', title:'Triple-Negative Breast Cancer: Current Challenges', level:'Avanzado', tags:['Oncología','TNBC'], body:
-`Triple-negative breast cancer, or TNBC, accounts for about ten to fifteen percent of all breast cancer cases. It is called triple-negative because the tumor cells test negative for the estrogen receptor, the progesterone receptor, and the HER2 protein.
+It's also useful to figure out when you work best. Some people are more productive early in the morning, while others do their best thinking at night. Understanding your own patterns, rather than fighting against them, can make it much easier to get things done in the long run.`,
+    questions:[
+      {q:'According to psychologists, what is procrastination usually related to?', options:['Laziness','Fear and feeling overwhelmed','Lack of intelligence','Poor time management skills'], answer:'Fear and feeling overwhelmed'},
+      {q:'What strategy does the text suggest for a task that feels too big?', options:['Ignoring it completely','Breaking it into smaller steps','Waiting until you feel motivated','Asking someone else to do it'], answer:'Breaking it into smaller steps'},
+      {q:'What does "get the ball rolling" mean?', options:['To finish a task','To start something','To play a game','To relax'], answer:'To start something'},
+      {q:'What does the text recommend about understanding when you work best?', options:['It\'s not important','It\'s useful and can help you get more done','Only morning people are productive','Everyone works the same way'], answer:'It\'s useful and can help you get more done'}
+    ]},
+  {id:'budget-travel', title:'Traveling on a Budget', level:'Intermedio', topic:'Viajes',
+    phrases:['cost an arm and a leg','cutting corners','missing out'],
+    body:
+`Traveling doesn't have to cost an arm and a leg. With a bit of planning, it's possible to see the world without spending your entire savings. The key is figuring out your priorities: what matters more to you, a comfortable hotel room or an extra week exploring a new country?
 
-Because TNBC lacks these three targets, it cannot be treated with hormone therapy or HER2-targeted drugs. This subtype tends to grow faster and is more likely to spread to other parts of the body than hormone receptor-positive breast cancer. It is also more common in younger women and in patients with a BRCA1 gene mutation.
+One of the easiest ways to save money is to travel during the off-season. Flights and accommodation are usually much cheaper when you avoid the busiest months, and popular attractions are far less crowded. Booking flights well in advance, or being flexible with your travel dates, can also make a substantial difference in price.
 
-For many years, chemotherapy was the only systemic treatment available for TNBC. In recent years, immunotherapy has changed this picture. Checkpoint inhibitors, such as pembrolizumab, help the immune system recognize and attack cancer cells, and have shown promising results when combined with chemotherapy, especially in early-stage disease.
+Once you're at your destination, eating like a local instead of only visiting restaurants aimed at tourists can save a surprising amount of money, and it's often more delicious too. Public transportation is almost always cheaper than taxis, and walking allows you to discover parts of a city you might otherwise miss.
 
-Researchers are also studying PARP inhibitors for patients with BRCA mutations, since these drugs interfere with the cancer cell's ability to repair its own DNA. Ongoing clinical trials continue to explore new combinations of immunotherapy, targeted therapy, and chemotherapy to improve outcomes for patients with this challenging subtype.`},
+Budget travel isn't about cutting corners on safety or missing out on great experiences. It's about being resourceful. With the right mindset, a trip that seems impossible on paper can become completely feasible.`,
+    questions:[
+      {q:'What does the text suggest as a way to save on flights and hotels?', options:['Traveling during the off-season','Always booking last minute','Staying only in expensive hotels','Avoiding public transportation'], answer:'Traveling during the off-season'},
+      {q:'What does "cost an arm and a leg" mean?', options:['To be very cheap','To be very expensive','To be dangerous','To take a long time'], answer:'To be very expensive'},
+      {q:'According to the text, why is eating like a local a good idea?', options:['It\'s always healthier','It saves money and is often more delicious','It\'s the only option available','Tourist restaurants are illegal'], answer:'It saves money and is often more delicious'},
+      {q:'What is the text\'s main message about budget travel?', options:['It requires cutting corners on safety','It\'s about being resourceful, not unsafe','It\'s impossible for most people','You should never plan ahead'], answer:'It\'s about being resourceful, not unsafe'}
+    ]},
+  {id:'sleep-science', title:'The Science of a Good Night\'s Sleep', level:'Intermedio', topic:'Salud',
+    phrases:['get by','catch up with','point out','backfires','in the long run'],
+    body:
+`Most adults need between seven and nine hours of sleep a night, yet many people get by on far less and don't think twice about it. Over time, this habit can catch up with them, affecting memory, mood, and even the immune system.
 
-  {id:'screening', title:'Breast Cancer Screening Guidelines', level:'Intermedio', tags:['Oncología','Prevención'], body:
-`Screening aims to detect breast cancer before symptoms appear, when treatment is most likely to be successful. The most common screening tool is mammography, an X-ray image of the breast that can reveal small tumors long before they can be felt during a physical exam.
+Sleep isn't simply a period when the brain switches off. During the night, the brain goes through several cycles, including deep sleep and REM sleep, when most dreaming occurs. Deep sleep is when the body repairs muscles and strengthens the immune system, while REM sleep plays a key role in processing emotions and consolidating memories.
 
-Most guidelines recommend that women with average risk begin annual or biennial mammograms starting between the ages of forty and fifty, continuing until at least age seventy-four. The exact starting age varies between medical organizations, and doctors often discuss the benefits and risks with each patient individually.
+Experts point out that it's not only the number of hours that matters, but also the quality of sleep. Looking at a phone screen right before bed can make it harder to fall asleep, since the light tricks the brain into thinking it's still daytime. Going to bed and waking up at the same time every day, even on weekends, also helps the body get into a healthy rhythm.
 
-Women with a higher risk of breast cancer, such as those with a strong family history or a known BRCA1 or BRCA2 mutation, may need to start screening earlier and may also benefit from additional imaging, such as breast MRI, alongside mammography.
+Skipping sleep to get more done might feel productive in the moment, but research shows it usually backfires. A tired brain struggles to concentrate, solve problems, and make good decisions, so, in the long run, a good night's sleep may be the most productive thing you can do.`,
+    questions:[
+      {q:'According to the text, what can lack of sleep affect?', options:['Only mood','Memory, mood, and the immune system','Only physical appearance','Nothing significant'], answer:'Memory, mood, and the immune system'},
+      {q:'What happens during deep sleep, according to the text?', options:['Most dreaming occurs','The body repairs muscles and strengthens the immune system','The brain completely shuts off','Nothing important happens'], answer:'The body repairs muscles and strengthens the immune system'},
+      {q:'Why does looking at a phone before bed make it harder to sleep?', options:['It makes you hungry','The light tricks the brain into thinking it\'s daytime','It\'s too quiet','It causes headaches'], answer:'The light tricks the brain into thinking it\'s daytime'},
+      {q:'What is the text\'s conclusion about skipping sleep to be productive?', options:['It\'s a great strategy','It usually backfires and hurts productivity','It has no effect','It only affects athletes'], answer:'It usually backfires and hurts productivity'}
+    ]}
+];
 
-Early detection through screening has contributed to a significant decline in breast cancer mortality over the past several decades. However, screening also has limitations, including the possibility of false positives, which can lead to unnecessary anxiety and additional testing. For this reason, shared decision-making between doctor and patient remains an essential part of any screening program.`}
+const LISTENING_QUESTIONS = [
+  {audio:"I'd like to book a flight for next Tuesday.", q:'What day does the speaker want to fly?', options:['Monday','Tuesday','Thursday','Today'], answer:'Tuesday'},
+  {audio:"She's been working here for three years.", q:'How long has she been working there?', options:['Three days','Three weeks','Three months','Three years'], answer:'Three years'},
+  {audio:"Can you turn down the volume, please?", q:'What does the speaker ask?', options:['To turn up the volume','To turn down the volume','To turn off the TV','To turn on the light'], answer:'To turn down the volume'},
+  {audio:"We should have left an hour ago.", q:'What does this sentence express?', options:['A plan for the future','Regret about the past','A question','A command'], answer:'Regret about the past'},
+  {audio:"He isn't coming to the party tonight.", q:'What did you hear?', options:['He is coming to the party','He isn\'t coming to the party','He was at the party','He is having a party'], answer:'He isn\'t coming to the party'},
+  {audio:"The meeting has been moved from Monday to Wednesday because the manager is traveling.", q:'Why was the meeting moved?', options:['The manager is traveling','The room was booked','Everyone was busy','The manager was sick'], answer:'The manager is traveling'},
+  {audio:"Although it was raining heavily, they decided to go for a walk anyway.", q:'What did they do despite the rain?', options:['They stayed home','They went for a walk','They canceled their plans','They took an umbrella and drove'], answer:'They went for a walk'},
+  {audio:"If I had known about the traffic, I would have left earlier.", q:'What is true about the speaker?', options:['They left early','They knew about the traffic','They didn\'t know about the traffic and arrived late','They avoided the traffic'], answer:'They didn\'t know about the traffic and arrived late'},
+  {audio:"The report needs to be finished by Friday at the latest.", q:'When is the deadline?', options:['Monday','Wednesday','Friday','Sunday'], answer:'Friday'},
+  {audio:"She used to play the piano when she was a child, but she doesn't play anymore.", q:'Does she play the piano now?', options:['Yes, every day','No, she stopped','Yes, but rarely','The text doesn\'t say'], answer:'No, she stopped'},
+  {audio:"I'm sorry, could you repeat that? I didn't catch what you said.", q:'What is the speaker asking for?', options:['More time','Repetition','Permission','Directions'], answer:'Repetition'},
+  {audio:"Despite having very little experience, she got the job because of her enthusiasm.", q:'Why did she get the job?', options:['Because of her experience','Because of her enthusiasm','Because she knew the manager','Because no one else applied'], answer:'Because of her enthusiasm'},
+  {audio:"By the time the ambulance arrived, the patient had already been moved to a different room.", q:'What had happened before the ambulance arrived?', options:['The patient had been moved','The ambulance had left','Nothing happened','The patient recovered'], answer:'The patient had been moved'},
+  {audio:"He's not as experienced as his colleague, but he's much more organized.", q:'What is true according to the sentence?', options:['He is more experienced but less organized','He is less experienced but more organized','He is neither experienced nor organized','He is both more experienced and organized'], answer:'He is less experienced but more organized'},
+  {audio:"We're supposed to submit the application before midnight, or it won't be accepted.", q:'What happens if the application is submitted after midnight?', options:['It will be accepted late','It won\'t be accepted','It will be reviewed first','Nothing changes'], answer:'It won\'t be accepted'}
 ];
 
 /* =========================================================
@@ -717,7 +845,7 @@ const BOX_INTERVAL = {1:0, 2:1*DAY, 3:2*DAY, 4:4*DAY, 5:8*DAY, 6:16*DAY};
 
 function defaultState(){
   return { vocab:{}, quiz:{totalAnswered:0,totalCorrect:0}, dialogues:{}, streak:{current:0,longest:0,lastActive:null}, xp:0,
-    customWords:[], customPapers:[], papersRead:[], translationCache:{} };
+    customWords:[], readingRead:[], translationCache:{} };
 }
 let state = loadState();
 
@@ -762,7 +890,7 @@ function wordId(catId, idx){ return catId + '__' + idx; }
 function allCategories(){
   const cats = VOCAB.slice();
   if(state.customWords.length){
-    cats.push({id:'glosario', name:'Mi glosario médico', emoji:'🩺',
+    cats.push({id:'glosario', name:'Mi glosario personal', emoji:'📌',
       words: state.customWords.map(w => [w.en, w.es, w.source ? ('De: '+w.source) : '', ''])});
   }
   return cats;
@@ -771,9 +899,9 @@ function allCategories(){
 /* =========================================================
    NAVIGATION
    ========================================================= */
-const VIEWS = ['home','vocab','flashcards','quiz','quiz-play','quiz-result','talk','talk-play','papers','paper-add','paper-read','progress'];
-const NAV_MAP = {home:'home', vocab:'vocab', quiz:'quiz', talk:'talk', papers:'papers', progress:'progress'};
-const NAV_ALIASES = {flashcards:'vocab', 'quiz-play':'quiz', 'quiz-result':'quiz', 'talk-play':'talk', 'paper-add':'papers', 'paper-read':'papers'};
+const VIEWS = ['home','vocab','flashcards','quiz','quiz-play','quiz-result','talk','talk-play','reading','reading-read','reading-quiz','reading-result','progress'];
+const NAV_MAP = {home:'home', vocab:'vocab', quiz:'quiz', talk:'talk', reading:'reading', progress:'progress'};
+const NAV_ALIASES = {flashcards:'vocab', 'quiz-play':'quiz', 'quiz-result':'quiz', 'talk-play':'talk', 'reading-read':'reading', 'reading-quiz':'reading', 'reading-result':'reading'};
 
 function goto(view){
   VIEWS.forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
@@ -791,7 +919,7 @@ function goto(view){
   if(view === 'vocab') renderVocabList();
   if(view === 'quiz') renderQuizSetup();
   if(view === 'talk') renderTalkList();
-  if(view === 'papers') renderPapersList();
+  if(view === 'reading') renderReadingList();
   if(view === 'progress') renderProgress();
 }
 
@@ -975,7 +1103,8 @@ function renderQuizSetup(){
   const wrap = document.getElementById('quizCatList');
   const options = [{id:'mixed', name:'Mixto (todas las categorías)', emoji:'🎯'}]
     .concat(allCategories().map(c => ({id:c.id, name:c.name, emoji:c.emoji})))
-    .concat([{id:'grammar', name:'Gramática básica', emoji:'📝'}]);
+    .concat([{id:'grammar', name:'Gramática intermedia', emoji:'📝'}])
+    .concat([{id:'listening', name:'Listening', emoji:'🎧'}]);
   wrap.innerHTML = options.map(o =>
     '<label class="radio-row'+(o.id===quizSelectedCat?' active':'')+'" data-opt="'+o.id+'">'+
       '<input type="radio" name="quizcat" value="'+o.id+'" '+(o.id===quizSelectedCat?'checked':'')+'>'+
@@ -1023,13 +1152,21 @@ function buildGrammarQuestions(count){
   }));
 }
 
+function buildListeningQuestions(count){
+  return shuffle(LISTENING_QUESTIONS).slice(0,count).map(l => ({
+    id:null, type:'listening', audio:l.audio, q:l.q, options: shuffle(l.options), answer:l.answer
+  }));
+}
+
 let quizState = null;
 function startQuiz(catSel){
   let questions;
   if(catSel === 'grammar'){
-    questions = buildGrammarQuestions(10);
+    questions = buildGrammarQuestions(12);
+  } else if(catSel === 'listening'){
+    questions = buildListeningQuestions(10);
   } else if(catSel === 'mixed'){
-    questions = shuffle(buildTranslateQuestions(allCategories().map(c=>c.id), 8).concat(buildGrammarQuestions(4))).slice(0,10);
+    questions = shuffle(buildTranslateQuestions(allCategories().map(c=>c.id), 7).concat(buildGrammarQuestions(3))).slice(0,10);
   } else {
     questions = buildTranslateQuestions([catSel], 10);
   }
@@ -1044,10 +1181,24 @@ function renderQuizQuestion(){
   if(pos >= questions.length){ finishQuiz(); return; }
   const q = questions[pos];
   const area = document.getElementById('quizPlayArea');
-  area.innerHTML =
-    '<div class="quiz-q-label">Pregunta '+(pos+1)+' de '+questions.length+'</div>'+
-    '<div class="quiz-q">'+q.q+'</div>'+
-    '<div class="quiz-options">'+ q.options.map(o => '<button class="opt-btn" data-val="'+encodeURIComponent(o)+'">'+o+'</button>').join('') +'</div>';
+  if(q.type === 'listening'){
+    area.innerHTML =
+      '<div class="quiz-q-label">Pregunta '+(pos+1)+' de '+questions.length+'</div>'+
+      '<div class="listen-box">'+
+        '<button class="listen-play" id="listenPlayBtn">🔊</button>'+
+        '<p class="listen-hint">Toca para escuchar (puedes repetirlo)</p>'+
+      '</div>'+
+      '<div class="quiz-q" style="font-size:18px;">'+q.q+'</div>'+
+      '<div class="quiz-options">'+ q.options.map(o => '<button class="opt-btn" data-val="'+encodeURIComponent(o)+'">'+o+'</button>').join('') +'</div>'+
+      '<div class="listen-transcript hidden" id="listenTranscript"></div>';
+    document.getElementById('listenPlayBtn').addEventListener('click', () => speak(q.audio));
+    speak(q.audio);
+  } else {
+    area.innerHTML =
+      '<div class="quiz-q-label">Pregunta '+(pos+1)+' de '+questions.length+'</div>'+
+      '<div class="quiz-q">'+q.q+'</div>'+
+      '<div class="quiz-options">'+ q.options.map(o => '<button class="opt-btn" data-val="'+encodeURIComponent(o)+'">'+o+'</button>').join('') +'</div>';
+  }
   area.querySelectorAll('.opt-btn').forEach(btn => {
     btn.addEventListener('click', () => answerQuiz(btn, decodeURIComponent(btn.getAttribute('data-val'))));
   });
@@ -1061,6 +1212,10 @@ function answerQuiz(btn, val){
     if(decodeURIComponent(b.getAttribute('data-val')) === q.answer) b.classList.add('correct');
     else if(b === btn) b.classList.add('wrong');
   });
+  if(q.type === 'listening'){
+    const t = document.getElementById('listenTranscript');
+    if(t){ t.textContent = '"' + q.audio + '"'; t.classList.remove('hidden'); }
+  }
   if(correct) quizState.correct += 1;
   state.quiz.totalAnswered += 1;
   if(correct) state.quiz.totalCorrect += 1;
@@ -1073,7 +1228,7 @@ function answerQuiz(btn, val){
   } else {
     saveState();
   }
-  setTimeout(() => { quizState.pos += 1; renderQuizQuestion(); }, 900);
+  setTimeout(() => { quizState.pos += 1; renderQuizQuestion(); }, q.type === 'listening' ? 1800 : 900);
 }
 
 function finishQuiz(){
@@ -1186,27 +1341,23 @@ function renderTalkLine(){
 }
 
 /* =========================================================
-   PAPERS
+   READING COMPREHENSION
    ========================================================= */
-function allPapers(){ return PAPERS.concat(state.customPapers); }
-
-function renderPapersList(){
-  const wrap = document.getElementById('papersList');
-  wrap.innerHTML = allPapers().map(p => {
-    const done = state.papersRead.includes(p.id);
-    const tags = (p.tags||['Personal']).map(t=>'<span class="paper-tag">'+t+'</span>').join('');
-    return '<div class="paper-row" data-paper="'+p.id+'">'+
-      '<div class="paper-emoji">📄</div>'+
+function renderReadingList(){
+  const wrap = document.getElementById('readingList');
+  wrap.innerHTML = READING.map(r => {
+    const done = state.readingRead.includes(r.id);
+    return '<div class="paper-row" data-reading="'+r.id+'">'+
+      '<div class="paper-emoji">📖</div>'+
       '<div class="cat-info">'+
-        '<div class="paper-title">'+p.title+'</div>'+
-        '<div class="paper-meta">'+(p.level||'Personal')+' · '+p.body.trim().split(/\s+/).length+' palabras</div>'+
-        '<div class="paper-tags">'+tags+'</div>'+
+        '<div class="paper-title">'+r.title+'</div>'+
+        '<div class="paper-meta">'+r.level+' · '+r.topic+' · '+r.body.trim().split(/\s+/).length+' palabras</div>'+
       '</div>'+
       '<div class="paper-check">'+(done?'✅':'›')+'</div>'+
     '</div>';
   }).join('');
   wrap.querySelectorAll('.paper-row').forEach(row => {
-    row.addEventListener('click', () => openPaper(row.getAttribute('data-paper')));
+    row.addEventListener('click', () => openReading(row.getAttribute('data-reading')));
   });
 }
 
@@ -1223,45 +1374,99 @@ function tokenizeReader(text){
   }).join('');
 }
 
-let currentPaperTitle = '';
-function openPaper(id){
-  const paper = allPapers().find(p => p.id === id);
-  if(!paper) return;
-  currentPaperTitle = paper.title;
-  document.getElementById('paperReadTitle').textContent = paper.title;
-  document.getElementById('paperReadBody').innerHTML = tokenizeReader(paper.body);
-  const markBtn = document.getElementById('markReadBtn');
-  markBtn.textContent = state.papersRead.includes(id) ? 'Leído ✓' : 'Marcar como leído ✓';
-  markBtn.onclick = () => markPaperRead(id);
-  goto('paper-read');
-}
-
-function markPaperRead(id){
-  if(!state.papersRead.includes(id)){
-    state.papersRead.push(id);
-    saveState();
-    addXp(15);
+function tokenizeReaderWithPhrases(text, phrases){
+  if(!phrases || !phrases.length) return tokenizeReader(text);
+  const sorted = phrases.slice().sort((a,b) => b.length - a.length);
+  const alts = sorted.map(p => p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+'));
+  const phraseRegex = new RegExp('\\b(' + alts.join('|') + ')\\b', 'gi');
+  let out = '';
+  let lastIndex = 0;
+  let m;
+  while((m = phraseRegex.exec(text)) !== null){
+    out += tokenizeReader(text.slice(lastIndex, m.index));
+    out += '<span class="word phrase">'+escapeHtml(m[0])+'</span>';
+    lastIndex = phraseRegex.lastIndex;
   }
-  document.getElementById('markReadBtn').textContent = 'Leído ✓';
+  out += tokenizeReader(text.slice(lastIndex));
+  return out;
 }
 
-document.getElementById('paperReadBody').addEventListener('click', (e) => {
+let currentReadingTitle = '';
+let currentReadingId = null;
+function openReading(id){
+  const r = READING.find(x => x.id === id);
+  if(!r) return;
+  currentReadingTitle = r.title;
+  currentReadingId = id;
+  document.getElementById('readingReadTitle').textContent = r.title;
+  document.getElementById('readingReadBody').innerHTML = tokenizeReaderWithPhrases(r.body, r.phrases);
+  goto('reading-read');
+}
+
+document.getElementById('readingReadBody').addEventListener('click', (e) => {
   const el = e.target.closest('.word');
   if(!el) return;
   openWordSheet(el.textContent, el);
 });
 
-document.getElementById('savePaperBtn').addEventListener('click', () => {
-  const title = document.getElementById('paperTitleInput').value.trim();
-  const body = document.getElementById('paperBodyInput').value.trim();
-  if(!title || !body){ alert('Completa el título y el texto.'); return; }
-  const id = 'custom_' + Date.now();
-  state.customPapers.push({id, title, body, level:'Personal', tags:['Personal']});
-  saveState();
-  document.getElementById('paperTitleInput').value = '';
-  document.getElementById('paperBodyInput').value = '';
-  openPaper(id);
+document.getElementById('readingContinueBtn').addEventListener('click', () => {
+  if(currentReadingId) startReadingQuiz(currentReadingId);
 });
+
+let readingQuizState = null;
+function startReadingQuiz(id){
+  const r = READING.find(x => x.id === id);
+  if(!r) return;
+  readingQuizState = {r, pos:0, correct:0, total:r.questions.length};
+  goto('reading-quiz');
+  renderReadingQuizQuestion();
+}
+
+function renderReadingQuizQuestion(){
+  const {r, pos, total} = readingQuizState;
+  document.getElementById('readingQuizProgressFill').style.width = Math.round((pos/total)*100)+'%';
+  if(pos >= total){ finishReadingQuiz(); return; }
+  const q = r.questions[pos];
+  const area = document.getElementById('readingQuizArea');
+  area.innerHTML =
+    '<div class="quiz-q-label">Pregunta '+(pos+1)+' de '+total+'</div>'+
+    '<div class="quiz-q" style="font-size:18px;">'+q.q+'</div>'+
+    '<div class="quiz-options">'+ q.options.map(o => '<button class="opt-btn" data-val="'+encodeURIComponent(o)+'">'+o+'</button>').join('') +'</div>';
+  area.querySelectorAll('.opt-btn').forEach(btn => {
+    btn.addEventListener('click', () => answerReadingQuiz(btn, decodeURIComponent(btn.getAttribute('data-val')), q));
+  });
+}
+
+function answerReadingQuiz(btn, val, q){
+  const correct = val === q.answer;
+  document.querySelectorAll('#readingQuizArea .opt-btn').forEach(b => {
+    b.disabled = true;
+    if(decodeURIComponent(b.getAttribute('data-val')) === q.answer) b.classList.add('correct');
+    else if(b === btn) b.classList.add('wrong');
+  });
+  if(correct) readingQuizState.correct += 1;
+  state.quiz.totalAnswered += 1;
+  if(correct) state.quiz.totalCorrect += 1;
+  saveState();
+  setTimeout(() => { readingQuizState.pos += 1; renderReadingQuizQuestion(); }, 900);
+}
+
+function finishReadingQuiz(){
+  const {r, correct, total} = readingQuizState;
+  const pct = Math.round((correct/total)*100);
+  if(!state.readingRead.includes(r.id)){ state.readingRead.push(r.id); saveState(); }
+  const xpEarned = correct*6 + 10;
+  addXp(xpEarned);
+  const emoji = pct >= 80 ? '🏆' : pct >= 50 ? '👍' : '💪';
+  const msg = pct >= 80 ? '¡Excelente comprensión!' : pct >= 50 ? '¡Buen intento, sigue así!' : 'Vuelve a leer el texto con calma y repasa.';
+  document.getElementById('readingResultArea').innerHTML =
+    '<div class="result-emoji">'+emoji+'</div>'+
+    '<div class="result-score">'+correct+' / '+total+'</div>'+
+    '<div class="result-sub">'+msg+' · +'+xpEarned+' XP</div>'+
+    '<button class="btn btn-primary" data-goto="reading" style="margin-bottom:10px;">Otro texto</button>'+
+    '<button class="btn btn-secondary" data-goto="home">Ir al inicio</button>';
+  goto('reading-result');
+}
 
 /* ---------- Word lookup sheet ---------- */
 let currentSheetWord = null;
@@ -1320,7 +1525,7 @@ document.getElementById('sheetSaveBtn').addEventListener('click', () => {
   if(!currentSheetWord || !trans || trans.indexOf('Traduciendo')===0 || trans.indexOf('No se pudo')===0) return;
   const exists = state.customWords.some(w => w.en.toLowerCase() === currentSheetWord.toLowerCase());
   if(!exists){
-    state.customWords.push({en: currentSheetWord, es: trans, source: currentPaperTitle || ''});
+    state.customWords.push({en: currentSheetWord, es: trans, source: currentReadingTitle || ''});
     saveState();
     addXp(3);
   }
@@ -1340,15 +1545,15 @@ function renderProgress(){
   const inReview = allWords.filter(w => w.seen > 0 && w.box < 4).length;
   const accuracy = state.quiz.totalAnswered ? Math.round((state.quiz.totalCorrect/state.quiz.totalAnswered)*100) : 0;
   const dlgDone = Object.values(state.dialogues).filter(d => d.completed).length;
-  const papersDone = state.papersRead.length;
+  const readingDone = state.readingRead.length;
 
   document.getElementById('progressStats').innerHTML = [
     ['📗', learned, 'Palabras aprendidas'],
     ['🔄', inReview, 'En repaso'],
     ['🎯', accuracy+'%', 'Precisión en ejercicios'],
     ['💬', dlgDone+' / '+DIALOGUES.length, 'Diálogos completados'],
-    ['📄', papersDone+' / '+allPapers().length, 'Papers leídos'],
-    ['🩺', state.customWords.length, 'Palabras en tu glosario'],
+    ['📖', readingDone+' / '+READING.length, 'Textos leídos'],
+    ['📌', state.customWords.length, 'Palabras en tu glosario'],
     ['🔥', state.streak.current, 'Racha actual (días)'],
     ['⭐', state.xp, 'XP total']
   ].map(s => '<div class="stat-card"><div style="font-size:20px;margin-bottom:6px;">'+s[0]+'</div><div class="stat-num">'+s[1]+'</div><div class="stat-label">'+s[2]+'</div></div>').join('');
@@ -1374,7 +1579,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
    SYNC (export / import / QR)
    ========================================================= */
 function syncPayload(){
-  return {v:1, customPapers: state.customPapers, customWords: state.customWords};
+  return {v:2, customWords: state.customWords};
 }
 
 function openSyncSheet(html){
@@ -1394,7 +1599,7 @@ document.getElementById('syncQrBtn').addEventListener('click', () => {
   if(b64.length > 1500){
     openSyncSheet(
       '<div style="font-size:40px;margin-bottom:10px;">📦</div>'+
-      '<p style="font-size:14.5px;line-height:1.6;">Tienes demasiados datos (papers largos) para un código QR ('+b64.length+' caracteres). Usa <b>"Exportar archivo"</b> en su lugar — funciona para cualquier cantidad.</p>'
+      '<p style="font-size:14.5px;line-height:1.6;">Tienes demasiadas palabras para un código QR ('+b64.length+' caracteres). Usa <b>"Exportar archivo"</b> en su lugar.</p>'
     );
     return;
   }
@@ -1412,7 +1617,7 @@ document.getElementById('syncExportBtn').addEventListener('click', () => {
   const filename = 'habla-mis-datos-' + todayStr() + '.json';
   const file = new File([blob], filename, {type:'application/json'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
-    navigator.share({files:[file], title:'Mis papers y glosario de Habla'}).catch(()=>{});
+    navigator.share({files:[file], title:'Mi glosario de Habla'}).catch(()=>{});
     return;
   }
   const url = URL.createObjectURL(blob);
@@ -1427,19 +1632,14 @@ document.getElementById('syncExportBtn').addEventListener('click', () => {
 });
 
 function mergeImportedData(data){
-  let addedPapers = 0, addedWords = 0;
-  (data.customPapers||[]).forEach(p => {
-    if(!state.customPapers.some(existing => existing.id === p.id)){
-      state.customPapers.push(p); addedPapers++;
-    }
-  });
+  let addedWords = 0;
   (data.customWords||[]).forEach(w => {
     if(!state.customWords.some(existing => existing.en.toLowerCase() === w.en.toLowerCase())){
       state.customWords.push(w); addedWords++;
     }
   });
   saveState();
-  return {addedPapers, addedWords};
+  return {addedWords};
 }
 
 document.getElementById('syncImportBtn').addEventListener('click', () => {
@@ -1452,10 +1652,10 @@ document.getElementById('importFileInput').addEventListener('change', (e) => {
   reader.onload = () => {
     try{
       const data = JSON.parse(reader.result);
-      const {addedPapers, addedWords} = mergeImportedData(data);
+      const {addedWords} = mergeImportedData(data);
       openSyncSheet(
         '<div style="font-size:40px;margin-bottom:10px;">🎉</div>'+
-        '<p style="font-size:14.5px;">Importado: <b>'+addedPapers+'</b> paper(s) y <b>'+addedWords+'</b> palabra(s) nuevas.</p>'
+        '<p style="font-size:14.5px;">Importado: <b>'+addedWords+'</b> palabra(s) nuevas.</p>'
       );
       renderProgress();
     }catch(err){
@@ -1472,11 +1672,11 @@ function handleHashImport(){
     const b64 = location.hash.slice(8);
     const json = decodeURIComponent(escape(atob(b64)));
     const data = JSON.parse(json);
-    const {addedPapers, addedWords} = mergeImportedData(data);
+    const {addedWords} = mergeImportedData(data);
     window.addEventListener('load', () => {
       openSyncSheet(
         '<div style="font-size:40px;margin-bottom:10px;">🎉</div>'+
-        '<p style="font-size:14.5px;">Importado desde el código QR: <b>'+addedPapers+'</b> paper(s) y <b>'+addedWords+'</b> palabra(s) nuevas.</p>'
+        '<p style="font-size:14.5px;">Importado desde el código QR: <b>'+addedWords+'</b> palabra(s) nuevas.</p>'
       );
     });
   }catch(e){ /* ignore malformed hash */ }
